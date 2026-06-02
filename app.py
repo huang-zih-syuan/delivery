@@ -3,6 +3,7 @@ from __future__ import annotations
 import heapq
 import itertools
 import math
+import os
 import time
 from dataclasses import dataclass
 from typing import Any
@@ -427,4 +428,5 @@ def format_solution(
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
