@@ -9,8 +9,8 @@
 3. 連接剛剛的 GitHub repository。
 4. 設定：
    - Runtime: Python
-   - Build Command: `pip install -r requirements.txt`
-   - Start Command: `gunicorn app:app`
+   - Build Command: `python3 -m pip install --upgrade pip && python3 -m pip install -r requirements.txt`
+   - Start Command: `python3 -m gunicorn app:app --bind 0.0.0.0:$PORT`
 5. 建立服務後等待部署完成。
 6. Render 會產生一個公開網址，打開後即可使用網頁系統。
 
