@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Express Delivery Route Optimizer</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="side-panel">
+        <div class="brand-block">
+          <div class="brand-mark">ED</div>
+          <div>
+            <p class="eyebrow">Algorithm PA2</p>
+            <h1>快遞路徑最佳化系統</h1>
+          </div>
+        </div>
+
+        <section class="panel-section">
+          <div class="section-title">
+            <span>地圖輸入</span>
+            <button class="icon-btn" id="resetMapBtn" title="重新整理範例地圖" type="button">↻</button>
+          </div>
+          <div class="tool-grid">
+            <button class="tool-btn active" data-mode="inspect" type="button">
+              <span class="tool-icon">✓</span>
+              選擇節點
+            </button>
+            <button class="tool-btn" data-mode="node" type="button">
+              <span class="tool-icon">＋</span>
+              新增節點
+            </button>
+            <button class="tool-btn" data-mode="edge" type="button">
+              <span class="tool-icon">⟷</span>
+              連接邊
+            </button>
+          </div>
+          <label class="upload-box" for="mapUpload">
+            <input id="mapUpload" type="file" accept=".csv,.json" />
+            <span class="upload-icon">⇧</span>
+            <span>
+              <strong>上傳 CSV / JSON 地圖檔</strong>
+              <small id="uploadName">尚未選擇檔案</small>
+            </span>
+          </label>
+        </section>
+
+        <section class="panel-section fleet-manager">
+          <div class="section-title">
+            <span>動態車隊管理器</span>
+            <span class="count-pill" id="fleetCount">3 vehicles</span>
+          </div>
+          <label class="form-label" for="startNode">司機出發點 s</label>
+          <select class="form-select" id="startNode"></select>
+
+          <div class="fleet-list" id="fleetList" aria-label="當前車隊列表"></div>
+
+          <button class="add-fleet-btn" id="addFleetBtn" type="button">➕ 新增配送車輛</button>
+
+          <form class="fleet-form" id="fleetForm">
+            <div class="row g-2">
+              <div class="col-7">
+                <label class="form-label" for="vehicleCode">車輛名稱</label>
+                <input class="form-control" id="vehicleCode" type="text" />
+              </div>
+              <div class="col-5">
+                <label class="form-label" for="vehicleCapacity">容量</label>
+                <input class="form-control" id="vehicleCapacity" type="number" value="40" min="1" />
+              </div>
+            </div>
+            <div class="fleet-form-actions">
+              <button class="confirm-btn" type="submit">確認</button>
+              <button class="cancel-btn" id="cancelFleetBtn" type="button">取消</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel-section">
+          <div class="section-title">
+            <span>本次任務集合 D</span>
+            <span class="count-pill" id="selectedCount">0 nodes</span>
+          </div>
+          <div class="task-list" id="taskList"></div>
+        </section>
+      </aside>
+
+      <main class="map-workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Interactive Graph Map · G=(V,E)</p>
+            <h2>城市配送拓撲地圖</h2>
+          </div>
+          <div class="action-cluster">
+            <button class="ghost-btn" id="saveDraftBtn" type="button">儲存草稿</button>
+            <button class="primary-btn" id="runOptimization" type="button">
+              <span>▶</span>
+              Run Optimization
+            </button>
+          </div>
+        </header>
+
+        <section class="workspace-grid">
+          <div class="graph-stage">
+            <div class="map-toolbar">
+              <div class="legend">
+                <span><i class="node-key depot"></i>轉運站 s</span>
+                <span><i class="node-key delivery"></i>送貨點</span>
+                <span><i class="node-key pickup"></i>取貨點</span>
+              </div>
+              <span class="mode-label" id="modeLabel">模式：選擇節點</span>
+            </div>
+
+            <svg class="graph-map" id="graphMap" viewBox="0 0 900 620" role="img" aria-label="城市圖形地圖">
+              <defs>
+                <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z"></path>
+                </marker>
+              </defs>
+              <g class="edge-layer" id="edgeLayer"></g>
+              <g class="route-layer" id="routeLayer"></g>
+              <g class="weight-layer" id="weightLayer"></g>
+              <g class="node-layer" id="nodeLayer"></g>
+            </svg>
+          </div>
+
+          <aside class="inspector">
+            <section class="panel-card">
+              <div class="section-title">
+                <span>節點任務設定</span>
+                <span class="count-pill" id="selectedNodeLabel">未選節點</span>
+              </div>
+              <label class="form-label" for="nodeType">任務類型</label>
+              <select class="form-select" id="nodeType">
+                <option value="delivery">Delivery - 送貨</option>
+                <option value="pickup">Pickup - 取貨</option>
+                <option value="depot">Depot - 起點</option>
+              </select>
+
+              <label class="form-label mt-3" for="taskAmount">貨量</label>
+              <input class="form-control" id="taskAmount" type="number" value="0" min="0" />
+
+              <div class="switch-row">
+                <span>加入本次目的地集合 D</span>
+                <input class="form-check-input" id="includeTask" type="checkbox" />
+              </div>
+
+              <button class="danger-action-btn" id="deleteNodeBtn" type="button">刪除目前節點</button>
+            </section>
+
+            <section class="panel-card schedule-panel">
+              <div class="section-title">
+                <span>多車排程時間軸</span>
+                <span class="status-dot" id="statusDot"></span>
+              </div>
+
+              <div class="schedule-metrics">
+                <div class="schedule-metric">
+                  <small>計算總耗時</small>
+                  <strong id="runtimeValue">--</strong>
+                </div>
+                <div class="schedule-metric">
+                  <small>車隊總行駛時間</small>
+                  <strong id="totalTimeValue">--</strong>
+                </div>
+              </div>
+
+              <div class="fleet-tabs" id="fleetTabs" role="tablist" aria-label="車輛切換頁籤"></div>
+              <div id="timelinePanels"></div>
+            </section>
+          </aside>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast-message" id="toastMessage" role="status"></div>
+    <script src="script.js"></script>
+  </body>
+</html>

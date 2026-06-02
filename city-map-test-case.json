@@ -1,0 +1,115 @@
+{
+  "startNodeId": 1,
+  "nodes": [
+    {
+      "id": 1,
+      "name": "配送中心",
+      "type": "depot",
+      "x": 165,
+      "y": 140,
+      "amount": 0,
+      "selected": false
+    },
+    {
+      "id": 2,
+      "name": "北區站點",
+      "type": "delivery",
+      "x": 365,
+      "y": 95,
+      "amount": 10,
+      "selected": false
+    },
+    {
+      "id": 3,
+      "name": "商辦取貨",
+      "type": "pickup",
+      "x": 655,
+      "y": 155,
+      "amount": 10,
+      "selected": true
+    },
+    {
+      "id": 4,
+      "name": "南區社區",
+      "type": "delivery",
+      "x": 260,
+      "y": 330,
+      "amount": 18,
+      "selected": true
+    },
+    {
+      "id": 5,
+      "name": "市集取貨",
+      "type": "pickup",
+      "x": 470,
+      "y": 285,
+      "amount": 8,
+      "selected": false
+    },
+    {
+      "id": 6,
+      "name": "西城宅配",
+      "type": "delivery",
+      "x": 365,
+      "y": 505,
+      "amount": 14,
+      "selected": true
+    },
+    {
+      "id": 7,
+      "name": "港口取貨",
+      "type": "pickup",
+      "x": 720,
+      "y": 410,
+      "amount": 12,
+      "selected": true
+    }
+  ],
+  "edges": [
+    {
+      "from": 1,
+      "to": 2,
+      "weight": 5
+    },
+    {
+      "from": 2,
+      "to": 3,
+      "weight": 9
+    },
+    {
+      "from": 1,
+      "to": 4,
+      "weight": 4
+    },
+    {
+      "from": 4,
+      "to": 5,
+      "weight": 6
+    },
+    {
+      "from": 5,
+      "to": 3,
+      "weight": 7
+    },
+    {
+      "from": 5,
+      "to": 7,
+      "weight": 6
+    },
+    {
+      "from": 4,
+      "to": 6,
+      "weight": 8
+    },
+    {
+      "from": 6,
+      "to": 7,
+      "weight": 10
+    },
+    {
+      "from": 1,
+      "to": 6,
+      "weight": 12
+    }
+  ]
+}
